@@ -7,7 +7,6 @@ Welcome to my technical portfolio. This repository contains redacted case studie
 | Severity | Vulnerability Type | Impact | Link |
 | :--- | :--- | :--- | :--- |
 | 🔴 Critical | **Fail-Open Logic Flaw** | Full Database PII Leak | [View Report](./writeups/fail-open-pii-leak.md) |
-| 🟠 High | **IDOR in Payment Gateway** | Unauthorized Transaction Access | [View Report](#) |
 
 ---
 ## 🛠️ My Methodology
