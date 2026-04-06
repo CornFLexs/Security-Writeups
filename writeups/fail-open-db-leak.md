@@ -1,6 +1,5 @@
 # 📑 Case Study: Full Database Leak via "Fail-Open" Logic Flaw
 
-**Date:** March 2026  
 **Severity:** CRITICAL (CVSS 9.1)  
 **Vulnerability Type:** Improper Error Handling / Fail-Open Logic  
 **Status:** Patched ✅
