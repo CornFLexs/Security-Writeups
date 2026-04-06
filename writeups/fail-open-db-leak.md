@@ -37,7 +37,7 @@ Content-Type: application/json
 }
 ```
 
-### The "Fail-Open" Response:
+**The "Fail-Open" Response:**
 The server responded with a 200 OK containing a JSON array of every booking record in the system.
 
 ```[
