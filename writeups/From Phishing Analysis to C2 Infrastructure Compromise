@@ -1,0 +1,48 @@
+🔍 1. Incident Overview
+I investigated a targeted phishing attempt within a corporate environment. The attack utilized a multi-stage infection chain: a malicious PDF dropper, a secondary executable payload, and a GitHub-hosted VBScript designed for data exfiltration. Upon identifying the Command & Control (C2) infrastructure, I performed a security assessment of the attacker’s "Data Receiver" server, leading to a successful Remote Code Execution (RCE) and total server compromise.
+
+🛠️ 2. Malware Analysis (Phase 1)
+The Dropper: A PDF file that, when opened, redirected the victim to a spoofed "AdobeUpdate" page to download a malicious .exe.
+
+
+Persistence & Evasion: To suppress suspicion, the malware immediately redirected the user to the legitimate Adobe website after the initial infection.
+
+
+Behavioral Analysis: Using Procmon and TCPView, I observed the executable downloading a script.vbs from a public GitHub repository into the Documents directory.
+
+The Payload: Analysis of the VBScript revealed it was designed to compress local user data and exfiltrate it to a remote server via a Python-based "Data Receiver" web application.
+
+⚡ 3. C2 Infrastructure Penetration (Phase 2)
+I identified three attacker-controlled IPs. One hosted a web interface for receiving stolen files.
+
+
+Reconnaissance: An Nmap scan revealed several open services, but the breakthrough came during a manual VAPT of the web directory.
+
+The Flaw: I discovered an exposed openapi.json configuration file, which mapped out the server's API endpoints.
+
+Exploitation:
+
+Endpoint Found: POST /api/v1/upload (Required filename, extension, and Base64-encoded data).
+
+The Bypass: The API lacked proper file-type validation.
+
+
+The Payload: I crafted a Python-based reverse shell, encoded it in Base64, and uploaded it as a .py file.
+
+Execution: By calling the file via the identified GET /api/v1/read endpoint, I triggered the shell.
+
+💻 4. Technical Proof of Concept (Redacted)
+Attacker's Vulnerable API Request:
+
+Result:
+The server executed the script, granting a reverse shell connection. Upon inspection of the server's storage, I verified that the attacker had not yet successfully exfiltrated data from other victims, effectively neutralizing the threat before a major breach occurred.
+
+🛡️ 5. Key Takeaways
+
+Defensive Layer: This case highlights the importance of monitoring network traffic for unauthorized GitHub or external script downloads.
+
+
+Offensive Layer: Exposed API documentation (OpenAPI/Swagger) is a critical information disclosure that can lead to total system takeover.
+
+
+Remediation: For the organization, I implemented stricter email filtering and blocked the identified C2 domains at the firewall level.
