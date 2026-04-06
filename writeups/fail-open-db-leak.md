@@ -35,7 +35,7 @@ Content-Type: application/json
   "user_id": "GHOST_ID_99921", 
   "filter": "all"
 }
-
+```
 
 ### The "Fail-Open" Response:
 The server responded with a 200 OK containing a JSON array of every booking record in the system.
@@ -44,7 +44,8 @@ The server responded with a 200 OK containing a JSON array of every booking reco
   { "id": 1, "name": "Admin", "email": "admin@target.com", "booking_ref": "ABC-123" },
   { "id": 2, "name": "Victim_User", "email": "victim@email.com", "booking_ref": "XYZ-789" },
   "// ... 50,000+ more entries"
-]'''
+]
+```
 
 ---
 
