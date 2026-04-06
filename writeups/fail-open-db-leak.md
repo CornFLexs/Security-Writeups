@@ -2,7 +2,6 @@
 
 **Severity:** CRITICAL (CVSS 9.1)  
 **Vulnerability Type:** Improper Error Handling / Fail-Open Logic  
-**Status:** Patched ✅
 
 ---
 
