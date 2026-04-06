@@ -106,3 +106,21 @@ data=[BASE64_ENCODED_PYTHON_SHELL]
 After uploading, I triggered the shell by accessing the /view/shell.py API.
 
 **Result:** 🏁 Connection Received! I gained full remote access to the attacker's server. 🤘
+
+---
+
+## 📊 6. Post-Exploitation & Impact
+Inside the attacker's "Data Receiver" server, I checked the exfiltration directories.
+
+* **Findings:** 📂 The server was largely empty. Only a few test files were present.
+
+* **Conclusion:** 📉 The attack was either caught early or the exfiltration script failed on other targets. The organizational data remained safe
+
+---
+
+## 🛠️ Tools Used
+Dynamic Analysis: Sysinternals (ProcMon, TCPView), Windows VM.
+
+* **Reconnaissance:** Nmap, Ffuf, OpenAPI/Swagger.
+
+* **Exploitation:** Python3, Base64, Netcat.
